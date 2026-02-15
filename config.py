@@ -1,8 +1,8 @@
 DB_CONFIG = {
     "host": "localhost",
     "user": "root",
-    "password": "YOUR_ROOT_PASSWORD",   # Put your MySQL root password
-    "database": "smart_blood_donor"
+    "password": "root123",  
+    "database": "BLOOD_DONOR_FINDER"
 }
 
 SECRET_KEY = "supersecretkey"

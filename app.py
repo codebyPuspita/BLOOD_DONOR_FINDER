@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import mysql.connector
 from models import get_db_connection
 from config import SECRET_KEY
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -77,5 +78,30 @@ def login():
         return jsonify({"error": "Invalid credentials"}), 401
 
 
+# @app.route('/add_donor', methods=['POST'])
+# def add_donor():
+#     data = request.get_json()
+#     name = data.get('name')
+#     blood_group = data.get('blood_group')
+#     email = data.get('email')
+#     phone = data.get('phone')
+#     city = data.get('city')
+
+#     conn = get_db_connection()
+#     cursor = conn.cursor()
+#     cursor.execute(
+#         "INSERT INTO donors (name, blood_group, email, phone, city) VALUES (%s, %s, %s, %s, %s)",
+#         (name, blood_group, email, phone, city)
+#     )
+#     conn.commit()
+#     cursor.close()
+#     conn.close()
+#     return jsonify({"message": "Donor added successfully!"})
+
+
+# if __name__ == '__main__':
+#     app.run(debug=True)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
+
