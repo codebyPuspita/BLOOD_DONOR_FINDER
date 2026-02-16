@@ -1,6 +1,13 @@
+# models.py
 import mysql.connector
+from mysql.connector import Error
 from config import DB_CONFIG
 
 def get_db_connection():
-    connection = mysql.connector.connect(**DB_CONFIG)
-    return connection
+    try:
+        connection = mysql.connector.connect(**DB_CONFIG)
+        if connection.is_connected():
+            return connection
+    except Error as e:
+        print(f"Error while connecting to MySQL: {e}")
+        return None
