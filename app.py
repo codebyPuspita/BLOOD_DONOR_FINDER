@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import mysql.connector
 from models import get_db_connection
 from config import SECRET_KEY
@@ -76,31 +76,61 @@ def login():
         return jsonify({"message": "Login successful"})
     else:
         return jsonify({"error": "Invalid credentials"}), 401
+    
+
+from mysql.connector import IntegrityError
+
+@app.route('/add_donor', methods=['POST'])
+def add_donor():
+    try:
+        data = request.get_json()
+
+        name = data.get('name')
+        email = data.get('email')
+        password = data.get('password')
+        blood_group = data.get('blood_group')
+        location = data.get('location')
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO donor (name, email, password, blood_group, location, eligibility_status, availability_status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (name, email, password, blood_group, location, "Eligible", "Active"))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({"message": "Donor added successfully!"})
+
+    except IntegrityError:
+        return jsonify({"error": "Email already exists"}), 400
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
-# @app.route('/add_donor', methods=['POST'])
-# def add_donor():
-#     data = request.get_json()
-#     name = data.get('name')
-#     blood_group = data.get('blood_group')
-#     email = data.get('email')
-#     phone = data.get('phone')
-#     city = data.get('city')
+@app.route('/search', methods=['POST'])
+def search():
+    blood_group = request.form['blood_group']
+    location = request.form['location']
 
-#     conn = get_db_connection()
-#     cursor = conn.cursor()
-#     cursor.execute(
-#         "INSERT INTO donors (name, blood_group, email, phone, city) VALUES (%s, %s, %s, %s, %s)",
-#         (name, blood_group, email, phone, city)
-#     )
-#     conn.commit()
-#     cursor.close()
-#     conn.close()
-#     return jsonify({"message": "Donor added successfully!"})
+    cursor = mysql.connection.cursor()
+    query = """
+        SELECT name, blood_group, location, phone 
+        FROM donor 
+        WHERE blood_group = %s 
+        AND location = %s 
+        AND availability_status = 'Active'
+    """
+    cursor.execute(query, (blood_group, location))
+    results = cursor.fetchall()
+    cursor.close()
 
+    return render_template('search_results.html', results=results)
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
